@@ -6,6 +6,8 @@ Interrupt driven HC-SR04 measurement on a Raspberry Pi using C.
 
 Use an HC-SR04 to measure distance with a minimum of computer resources (targeted at a Pi 0). This argues for a compiled language that uses an interrupt to measure the return pulse time. (There are a lot of existing projects on Github that use Python and/or C/C++ and which poll for the return pulse, tieing up the single core available in the Pi 0,)
 
+* <https://www.handsontec.com/dataspecs/HC-SR04-Ultrasonic.pdf> user guide.
+
 ## Inspiration
 
 * <https://github.com/phil-lavin/raspberry-pi-gpio-interrupt/blob/master/gpio-interrupt.c>
@@ -26,3 +28,8 @@ S/W is targeted for a Pi Zero and development is performed on a Pi 3B with the H
 |red|VCC|4|
 
 color codes are relative to the DuPont jumpers I used. The resistor divider is 1.5K Echo to orange and 3K orange to ground.
+
+## Status
+
+* 2024-04-30 (First commit of `hcsr04_distance.c`) Send long trigger pulse to verify GPIO write. Can also see a disturbance in the echo pin using a DVM.
+* 2025-05-01 Working measurement of sorts using empirically determined conversoin factor. And polling.
