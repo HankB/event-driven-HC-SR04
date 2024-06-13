@@ -32,4 +32,4 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 ## Status
 
 * 2024-04-30 (First commit of `hcsr04_distance.c`) Send long trigger pulse to verify GPIO write. Can also see a disturbance in the echo pin using a DVM.
-* 2025-05-01 Working measurement of sorts using empirically determined conversoin factor. And polling.
+* 2025-05-01 Working measurement of sorts using empirically determined conversion factor. And polling.
