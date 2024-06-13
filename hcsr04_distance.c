@@ -43,9 +43,12 @@ int main(int argc, char **argv)
 static clock_t start_echo; // time echo pulse starts
 static clock_t end_echo; // time return pulse starts
 
+/*
+* At present send_pulse() not only sends the pulse but also polls for the result. for the
+*/
 static void send_pulse(int gpio)
 {
-#define timestamp_count 5
+#define timestamp_count 4
     static clock_t timestamp[timestamp_count];
 
     timestamp[0] = clock();
@@ -54,25 +57,27 @@ static void send_pulse(int gpio)
     digitalWrite(gpio, LOW);             // finish trigger pulse
     timestamp[1] = clock();
 
-    // first cut, poll for transions Low to high indicates
+    // first cut, poll for transions Low to high indicates start of echo pulse
     while (!digitalRead(echo))
     {
         usleep(1); // 1 microsecond (minimim) sleep
     }
     timestamp[2] = start_echo = clock(); // mark start of pulse
-    timestamp[3] = clock();
 
+    // high to low indicates end of echo pulse
     while (digitalRead(echo))
     {
         usleep(1); // 1 microsecond (minimim) sleep
     }
-    timestamp[4] = end_echo = clock(); // mark end of echo
+    timestamp[3] = end_echo = clock(); // mark end of echo
 
+    // for now report delta-T from start of pulse.
     for (int i = 1; i < timestamp_count; i++)
     {
         printf("%ld, ", timestamp[i] - timestamp[0]);
     }
-    printf("\n");
+    // and lastly, start and end of return pulse.
+    printf("delta:%ld ", end_echo - start_echo);
 }
 
 static float read_distance(void)
