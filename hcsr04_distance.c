@@ -77,6 +77,7 @@ static float read_distance(void)
     // 39.5 empirically determined by taking readings at 6", 12" and 18"
     // to convert the readings to inches.
     float distance = ((float)(end_echo - start_echo)) / 39.5;
+    printf("%d %d %d ", int_count[0], int_count[1], int_count[2]);
     return distance;
 }
 
@@ -106,7 +107,10 @@ void handle(void)
         {
             end_echo = isr_entry;
             state = idle;
+            printf("delta: %ld\n", end_echo - start_echo);
         }
+        break;
+
     default:
         printf("state: %d\n", state);
         exit(-1);
