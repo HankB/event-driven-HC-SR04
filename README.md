@@ -2,6 +2,8 @@
 
 Interrupt driven HC-SR04 measurement on a Raspberry Pi using C.
 
+See branch `interrupt` for progress on the interrupt driven version.
+
 ## Motivation
 
 Use an HC-SR04 to measure distance with a minimum of computer resources (targeted at a Pi 0). This argues for a compiled language that uses an interrupt to measure the return pulse time. (There are a lot of existing projects on Github that use Python and/or C/C++ and which poll for the return pulse, tieing up the single core available in the Pi 0,)
