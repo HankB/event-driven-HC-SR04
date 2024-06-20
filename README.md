@@ -2,7 +2,7 @@
 
 Interrupt driven HC-SR04 measurement on a Raspberry Pi using C.
 
-The `interrupt` branch uses the WiringPi library.
+The `libgpiod` branch uses the libgpiod library and installs a handler for interrupts and captures time using the `clock()` call.
 
 ## Motivation
 
