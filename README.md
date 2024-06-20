@@ -2,7 +2,7 @@
 
 Interrupt driven HC-SR04 measurement on a Raspberry Pi using C.
 
-The `libgpiod` branch uses the libgpiod library and installs a handler for interrupts and captures time using the `clock()` call.
+The `libgpiod` branch uses the libgpiod library and uses time stamped events to measure the length of the echo pulse. See <https://github.com/HankB/GPIOD_Debian_Raspberry_Pi/blob/main/C_blinky/event_drive.c> for simple code that demonstrates this.
 
 ## Motivation
 
