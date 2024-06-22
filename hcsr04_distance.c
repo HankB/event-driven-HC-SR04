@@ -16,14 +16,14 @@ static float read_distance(void);
 int event_cb(int i, unsigned int j, const struct timespec *ts, void *unused);
 
 static const int echo = 23;                    // GPIO # for echo input
-static const struct timespec timeout = {1, 0}; // run for 1s and exit
+static const struct timespec timeout = {1, 0}; // monitor events for up to 1s and exit
 
 int main(int argc, char **argv)
 {
     float distance;                // distance we measure
     static const int trigger = 24; // GPIO # for trigger output
 
-    // init the ytihhrt output
+    // init the trigger output
     int rc = gpiod_ctxless_set_value("/dev/gpiochip0",
                                      trigger, 0, false,
                                      "consumer", 0, 0);
@@ -33,13 +33,22 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    send_pulse(trigger); // send the trigger pulse
+    // register to monitor events
     rc = gpiod_ctxless_event_monitor("/dev/gpiochip0",
                                      GPIOD_CTXLESS_EVENT_BOTH_EDGES,
                                      echo, false, "consumer",
                                      &timeout, 0, event_cb, 0);
     if (rc < 0)
         perror("gpiod_ctxless_event_monitor");
+
+    sleep(1); // allow input, output to settle
+
+    rc = gpiod_ctxless_get_value("/dev/gpiochip0",
+                                 echo, false, "consumer");
+    printf("echo %d\n", rc);
+
+    send_pulse(trigger); // send the trigger pulse
+
     distance = read_distance();
     printf("Hello World, rc is %d, distance %f\n", rc, distance);
 }
@@ -72,12 +81,12 @@ static struct timespec start = {0.0};  // start of echo pulse
 static struct timespec finish = {0.0}; // end of echo pulse
 
 // read_distance() will calculate the distance based on time stamps collected
-// by event_cb() 
+// by event_cb()
 static float read_distance(void)
 {
     float pulse_width = (float)(finish.tv_nsec - start.tv_nsec) / 1000000000;
     // TODO handle rollover of tv_sec between readings
-    float distance = pulse_width*1100/2.0;
+    float distance = pulse_width * 1100 / 2.0;
     return distance;
 }
 
