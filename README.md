@@ -33,6 +33,7 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
+* 2024-06-22 switch fron contextless operations, acquire chip, trigger and configure trigger.
 * 2024-06-22 Working and using the `libgpiod` event facility. Results not accurate.
 * 2024-06-13 fiddling with polled version. Planning to implement interrupts in a feature branch
 * 2024-06-13 first cut at using an ISR. I don't understand the results. There seem to be many fewer clock counts than with polling. Perhaps `clock()` is not suitable to use in an ISR.
