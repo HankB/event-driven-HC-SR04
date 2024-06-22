@@ -54,26 +54,26 @@ int main(int argc, char **argv)
 }
 
 /*
- * send pulse to initiate measurement
+ * Callback for send_pulse() to delay 10ns.
+ */
+static void send_pulse_cb(void * unused)
+{
+    usleep(10); // 10 microsecond (minimim) sleep
+}
+/*
+ * send pulse to initiate measurement. Callback will delay 10ns
+ * And at the completion of gpiod_ctxless_set_value() the pulse will
+ * turn off. I think.
  */
 static void send_pulse(int gpio)
 {
     printf("sending pulse\n");
     int rc = gpiod_ctxless_set_value("/dev/gpiochip0",
                                      gpio, 1, false,
-                                     "consumer", 0, 0);
+                                     "consumer", send_pulse_cb, 0);
     if (rc < 0)
     {
-        perror("gpiod_ctxless_set_value");
-        return;
-    }
-    usleep(10); // 10 microsecond (minimim) sleep
-    rc = gpiod_ctxless_set_value("/dev/gpiochip0",
-                                 gpio, 0, false,
-                                 "consumer", 0, 0);
-    if (rc < 0)
-    {
-        perror("gpiod_ctxless_set_value");
+        perror("send_pulse(): gpiod_ctxless_set_value");
     }
 }
 
