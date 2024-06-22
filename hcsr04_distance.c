@@ -31,8 +31,6 @@ static struct timespec finish = {0.0}; // end of echo pulse
 
 int main(int argc, char **argv)
 {
-    // float distance; // distance we measure
-
     // need to open the chip first
     struct gpiod_chip *chip = gpiod_chip_open(GPIO_chip_name);
     if (chip == NULL)
@@ -93,9 +91,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
-
+    // register to read events
     rc = gpiod_line_request_both_edges_events(echo_line, cnsmr);
-    printf("%d = gpiod_line_request_both_edges_events()\n", rc);
     if (0 > rc)
     {
         perror("               gpiod_line_request_both_edges_events(echo_line)");
@@ -106,7 +103,6 @@ int main(int argc, char **argv)
     }
 
     rc = send_pulse(trigger_line); // send the trigger pulse
-    printf("%d = send_pulse()\n", rc);
     if (0 != rc)
     {
         perror("send_pulse(trigger_line)");
@@ -116,13 +112,11 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    // gpiod_line_event_wait() seems not required unless a timeout is needed
-
     while (true)
     {
         const struct timespec timeout = {0L, 1000000L}; // 1000000ns, 0s
         rc = gpiod_line_event_wait(echo_line, &timeout);
-        printf("%d = gpiod_line_event_wait()\n", rc);
+        //  printf("%d = gpiod_line_event_wait()\n", rc);
         if (rc < 0)
         {
             perror("               gpiod_line_event_wait(echo_line)");
@@ -133,16 +127,13 @@ int main(int argc, char **argv)
         }
         struct gpiod_line_event event;
         rc = gpiod_line_event_read(echo_line, &event);
-        printf("%d = gpiod_line_event_read()\n", rc);
+        //  printf("%d = gpiod_line_event_read()\n", rc);
         if (rc < 0)
         {
-            printf("event %d at %ld s, %ld ns\n", event.event_type, event.ts.tv_sec, event.ts.tv_nsec);
             perror("               gpiod_line_event_read(gpio_11, &event)");
         }
         else
         {
-            printf("event %d at %ld s, %ld ns\n",
-                   event.event_type, event.ts.tv_sec, event.ts.tv_nsec);
             switch (event.event_type)
             {
             case GPIOD_LINE_EVENT_RISING_EDGE:
@@ -153,8 +144,6 @@ int main(int argc, char **argv)
             case GPIOD_LINE_EVENT_FALLING_EDGE:
             {
                 finish = event.ts;
-                long int dt = finish.tv_nsec - start.tv_nsec;
-                printf("delta-T: %ld %ld %ld \n", finish.tv_nsec, start.tv_nsec, dt);
                 gpiod_line_release(trigger_line);
                 gpiod_line_release(echo_line);
                 gpiod_chip_close(chip);
@@ -173,7 +162,7 @@ int main(int argc, char **argv)
 
 static int send_pulse(struct gpiod_line *line)
 {
-    printf("sending pulse\n");
+    //  printf("sending pulse\n");
     int rc = gpiod_line_set_value(line, 1);
     if (rc < 0)
     {
