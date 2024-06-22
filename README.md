@@ -38,3 +38,11 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 * 2024-06-13 first cut at using an ISR. I don't understand the results. There seem to be many fewer clock counts than with polling. Perhaps `clock()` is not suitable to use in an ISR.
 * 2024-05-01 Working measurement of sorts using empirically determined conversion factor. And polling.
 * 2024-04-30 (First commit of `hcsr04_distance.c`) Send long trigger pulse to verify GPIO write. Can also see a disturbance in the echo pin using a DVM.
+
+## Troubleshooting notes
+
+### 2024-06-22 
+
+* Timing. Study the description at <https://thepihut.com/blogs/raspberry-pi-tutorials/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi> and see that they delay 2s after configuring the trigger output. Tried - no help. But will leave in. <https://www.raspberrypi-spy.co.uk/2012/12/ultrasonic-distance-measurement-using-python-part-1/> suggests 0.5s so I will go with this. 
+* Interesting, inserting a 1s delay between registering the event and sending the pulse results in a timeout in the event monitor.
+* More tweaking of timing. Giving up on the contextless operations for now as the events are happening before the trigger pulse is sent. (#457226f)
