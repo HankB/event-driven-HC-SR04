@@ -33,7 +33,8 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
-* 2024-04-30 (First commit of `hcsr04_distance.c`) Send long trigger pulse to verify GPIO write. Can also see a disturbance in the echo pin using a DVM.
-* 2024-05-01 Working measurement of sorts using empirically determined conversion factor. And polling.
+* 2024-06-22 Working and using the `libgpiod` event facility. Results not accurate.
 * 2024-06-13 fiddling with polled version. Planning to implement interrupts in a feature branch
 * 2024-06-13 first cut at using an ISR. I don't understand the results. There seem to be many fewer clock counts than with polling. Perhaps `clock()` is not suitable to use in an ISR.
+* 2024-05-01 Working measurement of sorts using empirically determined conversion factor. And polling.
+* 2024-04-30 (First commit of `hcsr04_distance.c`) Send long trigger pulse to verify GPIO write. Can also see a disturbance in the echo pin using a DVM.
