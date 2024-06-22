@@ -17,13 +17,13 @@ Build:
 #include <stdlib.h>
 #include <gpiod.h>
 
-static void send_pulse(int gpio);
-static float read_distance(void);
+static int send_pulse(struct gpiod_line *);
+//static float read_distance(void);
 int event_cb(int i, unsigned int j, const struct timespec *ts, void *unused);
 
-static const int echo = 23;                           // GPIO # for echo input
-static const int trigger = 24;                        // GPIO # for trigger output
-static const struct timespec timeout = {1, 0};        // monitor events for up to 1s and exit
+//static const int echo = 23;                           // GPIO # for echo input
+//static const int trigger = 24;                        // GPIO # for trigger output
+// static const struct timespec timeout = {1, 0};        // monitor events for up to 1s and exit
 static const char *cnsmr = "HC-SR04";                 // declare a consumer to use for calls
 static const char *GPIO_chip_name = "/dev/gpiochip0"; // name of trigger GPIO (output)
 static const char *trigger_name = "GPIO24";           // name of trigger GPIO (output)
@@ -55,7 +55,7 @@ void report_line_attributes(struct gpiod_line *line, const char *name)
 
 int main(int argc, char **argv)
 {
-    float distance; // distance we measure
+    //float distance; // distance we measure
 
     // need to open the chip first
     struct gpiod_chip *chip = gpiod_chip_open(GPIO_chip_name);
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // acquire & configure GPIO 24
+    // acquire & configure GPIO 24 (trigger) for output
 
     struct gpiod_line *trigger_line;
 
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
     printf("===== line found, unconfigured\n");
     report_line_attributes(trigger_line, trigger_name);
     sleep(2);
-    
+
     const struct gpiod_line_request_config write_config =
         {cnsmr,
          GPIOD_LINE_REQUEST_DIRECTION_OUTPUT,
@@ -109,38 +109,82 @@ int main(int argc, char **argv)
     report_line_attributes(trigger_line, cnsmr);
     printf("============\n\n");
 
-#if 0
-    // init the trigger output
-    int rc = gpiod_ctxless_set_value("/dev/gpiochip0",
-                                     trigger, 0, false,
-                                     "consumer", 0, 0);
-    if (rc < 0)
+    // acquire & configure GPIO 23 (echo) for input
+
+    struct gpiod_line *echo_line;
+
+    echo_line = gpiod_chip_find_line(chip, echo_name);
+    if (echo_line == NULL)
     {
-        perror("gpiod_ctxless_set_value");
+        perror("gpiod_chip_find_line(echo_name)");
+        gpiod_chip_close(chip);
         return 1;
     }
+    printf("===== echo line found, unconfigured\n");
+    report_line_attributes(echo_line, echo_name);
+    sleep(2);
 
-    // register to monitor events
-    rc = gpiod_ctxless_event_monitor("/dev/gpiochip0",
-                                     GPIOD_CTXLESS_EVENT_BOTH_EDGES,
-                                     echo, false, "consumer",
-                                     &timeout, 0, event_cb, 0);
+    if (echo_line == NULL)
+    {
+        perror("gpiod_chip_find_line(echo_name)");
+        gpiod_chip_close(chip);
+        return 1;
+    }
+    printf("===== echo line found, unconfigured\n");
+    report_line_attributes(echo_line, echo_name);
+    sleep(2);
+
+    const struct gpiod_line_request_config read_config =
+        {cnsmr,
+         GPIOD_LINE_REQUEST_DIRECTION_INPUT,
+         0};
+
+    rc = gpiod_line_request(echo_line,
+                            &read_config,
+                            0);
     if (rc < 0)
-        perror("gpiod_ctxless_event_monitor");
+    {
+        perror("               gpiod_line_request(echo_line)");
+        gpiod_line_release(echo_line);
+        gpiod_chip_close(chip);
+    }
+
+    printf("===== line configured for read \n");
+    report_line_attributes(echo_line, cnsmr);
+    printf("============\n\n");
 
     sleep(1); // allow input, output to settle
 
-    rc = gpiod_ctxless_get_value("/dev/gpiochip0",
-                                 echo, false, "consumer");
-    printf("echo %d\n", rc);
+    send_pulse(trigger_line); // send the trigger pulse
 
-    send_pulse(trigger); // send the trigger pulse
+#if 0
+
 
     distance = read_distance();
     printf("Hello World, rc is %d, distance %f\n", rc, distance);
 #endif
     gpiod_line_release(trigger_line);
+    gpiod_line_release(echo_line);
     gpiod_chip_close(chip);
+}
+
+static int send_pulse(struct gpiod_line *line)
+{
+    printf("sending pulse\n");
+    int rc = gpiod_line_set_value(line, 1);
+    if (rc < 0)
+    {
+        perror("               gpiod_line_set_value(line,1)");
+        return 1;
+    }
+    usleep(10);
+    rc = gpiod_line_set_value(line, 0);
+    if (rc < 0)
+    {
+        perror("               gpiod_line_set_value(line,0)");
+        return 1;
+    }
+    return 0;
 }
 
 #if 0
