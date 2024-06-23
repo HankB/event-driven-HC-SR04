@@ -33,7 +33,7 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
-* 2024-06-33 working code (finally!) but deriously in need of refactoring.
+* 2024-06-33 working code (finally!) but seriously in need of refactoring.
 * 2024-06-22 switch fron contextless operations, acquire chip, trigger and configure trigger.
 * 2024-06-22 Working and using the `libgpiod` event facility. Results not accurate.
 * 2024-06-13 fiddling with polled version. Planning to implement interrupts in a feature branch
