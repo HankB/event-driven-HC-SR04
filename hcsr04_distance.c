@@ -19,7 +19,16 @@ Build:
 
 static int send_pulse(struct gpiod_line *);
 static float read_distance(void);
-int event_cb(int i, unsigned int j, const struct timespec *ts, void *unused);
+typedef enum
+{
+    read_line,
+    write_line,
+    monitor_line,
+} line_function;
+struct gpiod_line *init_GPIO(struct gpiod_chip *chip,
+                             const char *name,
+                             const char *context,
+                             line_function function, int flags);
 
 static const char *cnsmr = "HC-SR04";                 // declare a consumer to use for calls
 static const char *GPIO_chip_name = "/dev/gpiochip0"; // name of trigger GPIO (output)
@@ -38,71 +47,30 @@ int main(int argc, char **argv)
         perror("gpiod_chip_open()");
         return 1;
     }
-
     // acquire & configure GPIO 24 (trigger) for output
-
     struct gpiod_line *trigger_line;
-
-    trigger_line = gpiod_chip_find_line(chip, trigger_name);
-    if (trigger_line == NULL)
+    trigger_line = init_GPIO(chip, trigger_name, cnsmr, write_line, 0);
+    if (0 == trigger_line)
     {
-        perror("gpiod_chip_find_line(trigger_name)");
+        perror("               init_GPIO(trigger_line)");
         gpiod_chip_close(chip);
         return 1;
     }
-
-    if (trigger_line == NULL)
-    {
-        perror("gpiod_chip_find_line(trigger_name)");
-        gpiod_chip_close(chip);
-        return 1;
-    }
-
-    const struct gpiod_line_request_config write_config =
-        {cnsmr,
-         GPIOD_LINE_REQUEST_DIRECTION_OUTPUT,
-         0};
-
-    int rc = gpiod_line_request(trigger_line,
-                                &write_config,
-                                0);
-    if (rc < 0)
-    {
-        perror("               gpiod_line_request(trigger_line)");
-        gpiod_line_release(trigger_line);
-        gpiod_chip_close(chip);
-    }
-
     // acquire & configure GPIO 23 (echo) for input
 
     struct gpiod_line *echo_line;
 
-    echo_line = gpiod_chip_find_line(chip, echo_name);
-    if (echo_line == NULL)
-    {
-        perror("gpiod_chip_find_line(echo_name)");
-        gpiod_chip_close(chip);
-        return 1;
-    }
-    if (echo_line == NULL)
-    {
-        perror("gpiod_chip_find_line(echo_name)");
-        gpiod_chip_close(chip);
-        return 1;
-    }
+    echo_line = init_GPIO(chip, echo_name, cnsmr, monitor_line, 0);
 
-    // register to read events
-    rc = gpiod_line_request_both_edges_events(echo_line, cnsmr);
-    if (0 > rc)
+    if (0 == echo_line)
     {
-        perror("               gpiod_line_request_both_edges_events(echo_line)");
+        perror("gpiod_chip_find_line(echo_name)");
         gpiod_line_release(trigger_line);
-        gpiod_line_release(echo_line);
         gpiod_chip_close(chip);
-        return -1;
+        return 1;
     }
 
-    rc = send_pulse(trigger_line); // send the trigger pulse
+    int rc = send_pulse(trigger_line); // send the trigger pulse
     if (0 != rc)
     {
         perror("send_pulse(trigger_line)");
@@ -116,7 +84,6 @@ int main(int argc, char **argv)
     {
         const struct timespec timeout = {0L, 1000000L}; // 1000000ns, 0s
         rc = gpiod_line_event_wait(echo_line, &timeout);
-        //  printf("%d = gpiod_line_event_wait()\n", rc);
         if (rc < 0)
         {
             perror("               gpiod_line_event_wait(echo_line)");
@@ -127,7 +94,6 @@ int main(int argc, char **argv)
         }
         struct gpiod_line_event event;
         rc = gpiod_line_event_read(echo_line, &event);
-        //  printf("%d = gpiod_line_event_read()\n", rc);
         if (rc < 0)
         {
             perror("               gpiod_line_event_read(gpio_11, &event)");
@@ -153,11 +119,50 @@ int main(int argc, char **argv)
             }
         }
     }
-    ////////////////////////////////////////////////
 
     gpiod_line_release(trigger_line);
     gpiod_line_release(echo_line);
     gpiod_chip_close(chip);
+}
+
+struct gpiod_line *init_GPIO(struct gpiod_chip *chip,
+                             const char *name,
+                             const char *context,
+                             line_function func, int flags)
+{
+    struct gpiod_line *line;
+
+    line = gpiod_chip_find_line(chip, name);
+    if (line == NULL)
+    {
+        return 0;
+    }
+
+    if (func == read_line || func == write_line)
+    {
+        const struct gpiod_line_request_config config =
+            {context,
+             (func == write_line) ? GPIOD_LINE_REQUEST_DIRECTION_OUTPUT : GPIOD_LINE_REQUEST_DIRECTION_INPUT,
+             flags};
+
+        int rc = gpiod_line_request(line,
+                                    &config,
+                                    0);
+        if (0 != rc)
+        {
+            return 0;
+        }
+    }
+    else if (func == monitor_line)
+    {
+        // register to read events
+        int rc = gpiod_line_request_both_edges_events(line, cnsmr);
+        if (0 > rc)
+        {
+            return 0;
+        }
+    }
+    return line;
 }
 
 static int send_pulse(struct gpiod_line *line)
