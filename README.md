@@ -2,7 +2,7 @@
 
 Interrupt driven HC-SR04 measurement on a Raspberry Pi using C.
 
-See branch `interrupt` for progress on the interrupt driven version.
+The `libgpiod` branch uses the libgpiod library and uses time stamped events to measure the length of the echo pulse. See <https://github.com/HankB/GPIOD_Debian_Raspberry_Pi/blob/main/C_blinky/event_drive.c> for simple code that demonstrates this.
 
 ## Motivation
 
@@ -33,6 +33,19 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
-* 2024-04-30 (First commit of `hcsr04_distance.c`) Send long trigger pulse to verify GPIO write. Can also see a disturbance in the echo pin using a DVM.
+* 2024-06-23 working code, some refactoring complete. Need to tweak output for my needs.
+* 2024-06-23 working code (finally!) but seriously in need of refactoring.
+* 2024-06-22 switch fron contextless operations, acquire chip, trigger and configure trigger.
+* 2024-06-22 Working and using the `libgpiod` event facility. Results not accurate.
+* 2024-06-13 fiddling with polled version. Planning to implement interrupts in a feature branch
+* 2024-06-13 first cut at using an ISR. I don't understand the results. There seem to be many fewer clock counts than with polling. Perhaps `clock()` is not suitable to use in an ISR.
 * 2024-05-01 Working measurement of sorts using empirically determined conversion factor. And polling.
-* 2024-06-06 fiddling with polled version. Planning to implement interrupts in a feature branch
+* 2024-04-30 (First commit of `hcsr04_distance.c`) Send long trigger pulse to verify GPIO write. Can also see a disturbance in the echo pin using a DVM.
+
+## Troubleshooting notes
+
+### 2024-06-22 
+
+* Timing. Study the description at <https://thepihut.com/blogs/raspberry-pi-tutorials/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi> and see that they delay 2s after configuring the trigger output. Tried - no help. But will leave in. <https://www.raspberrypi-spy.co.uk/2012/12/ultrasonic-distance-measurement-using-python-part-1/> suggests 0.5s so I will go with this. 
+* Interesting, inserting a 1s delay between registering the event and sending the pulse results in a timeout in the event monitor.
+* More tweaking of timing. Giving up on the contextless operations for now as the events are happening before the trigger pulse is sent. (#457226f)
