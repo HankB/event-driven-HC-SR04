@@ -70,23 +70,29 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    int rc = send_pulse(trigger_line); // send the trigger pulse
-    if (0 != rc)
+    int reading_count = 0;
+    bool need_pulse = true;
+    while (reading_count < 50)
     {
-        perror("send_pulse(trigger_line)");
-        gpiod_line_release(trigger_line);
-        gpiod_line_release(echo_line);
-        gpiod_chip_close(chip);
-        return -1;
-    }
+        if (need_pulse)
+        {
+            int rc = send_pulse(trigger_line); // send the trigger pulse
+            if (0 != rc)
+            {
+                perror("send_pulse(trigger_line)");
+                gpiod_line_release(trigger_line);
+                gpiod_line_release(echo_line);
+                gpiod_chip_close(chip);
+                return -1;
+            }
+            need_pulse = false;
+        }
 
-    while (true)
-    {
         const struct timespec timeout = {0L, 1000000L}; // 1000000ns, 0s
-        rc = gpiod_line_event_wait(echo_line, &timeout);
+        int rc = gpiod_line_event_wait(echo_line, &timeout);
         if (rc < 0)
         {
-            perror("               gpiod_line_event_wait(echo_line)");
+            perror("gpiod_line_event_wait(echo_line)");
             gpiod_line_release(trigger_line);
             gpiod_line_release(echo_line);
             gpiod_chip_close(chip);
@@ -96,7 +102,7 @@ int main(int argc, char **argv)
         rc = gpiod_line_event_read(echo_line, &event);
         if (rc < 0)
         {
-            perror("               gpiod_line_event_read(gpio_11, &event)");
+            perror("gpiod_line_event_read(gpio_11, &event)");
         }
         else
         {
@@ -109,12 +115,14 @@ int main(int argc, char **argv)
             }
             case GPIOD_LINE_EVENT_FALLING_EDGE:
             {
-                finish = event.ts;
-                gpiod_line_release(trigger_line);
-                gpiod_line_release(echo_line);
-                gpiod_chip_close(chip);
-                printf("distance %f\n", read_distance());
-                return 0;
+                if (start.tv_sec != 0) // if we didn't miss the start of the pulse
+                {
+                    finish = event.ts;
+                    printf("distance %f\n", read_distance());
+                    start.tv_sec = 0; // zero our for next reading
+                    reading_count++;
+                }
+                need_pulse = true;
             }
             }
         }
@@ -188,8 +196,8 @@ static int send_pulse(struct gpiod_line *line)
 //  stamps collected during event monitoring
 static float read_distance(void)
 {
-    float pulse_width = (float)(finish.tv_nsec - start.tv_nsec) / 1000000000;
-    // TODO handle rollover of tv_sec between readings
-    float distance = pulse_width * 1100 / 2.0;
+    float pulse_width = ((float)(finish.tv_nsec - start.tv_nsec) / 1000000000) 
+                        + (finish.tv_sec - start.tv_sec);
+    float distance = pulse_width * 1100 * 12 / 2.0; // distance in inches based on 1100 fps in air
     return distance;
 }
