@@ -33,6 +33,7 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
+* 2024-06-27 Testing at greater distance. 50 consecutive readings are all over the place.
 * 2024-06-24 Code seems to be working well, albeit only tested in a Pi 3B and at distances ranging from 1-2 feet. Need to test on a Pi Zero and at other distances. It would be interesting to try on a Pi 5 as well.
 
 ## Troubleshooting notes
