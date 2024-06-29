@@ -76,6 +76,7 @@ int main(int argc, char **argv)
     {
         if (need_pulse)
         {
+            usleep(60*1000); // delay 60 msec per recommendation
             int rc = send_pulse(trigger_line); // send the trigger pulse
             if (0 != rc)
             {
