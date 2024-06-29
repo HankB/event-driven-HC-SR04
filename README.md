@@ -31,6 +31,11 @@ S/W is targeted for a Pi Zero and development is performed on a Pi 3B with the H
 
 color codes are relative to the DuPont jumpers I used. The resistor divider is 1.5K Echo to orange and 3K orange to ground.
 
+## Device details
+
+* <https://www.digikey.com/htmldatasheets/production/1979760/0/0/1/hc-sr04.html> " we suggest to use over 60ms measurement cycle, in order to prevent trigger signal to the echo signal."
+* <https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/> "This sensor reads from 2cm to 400cm (0.8inch to 157inch) with an accuracy of 0.3cm (0.1inches), ..."
+
 ## Status
 
 * 2024-06-27 Testing at greater distance. 50 consecutive readings are all over the place.
