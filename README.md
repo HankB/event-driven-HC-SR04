@@ -1,6 +1,6 @@
-# interrupt-driven-HC-SR04
+# event-driven-HC-SR04
 
-Interrupt driven HC-SR04 measurement on a Raspberry Pi using C.
+Event driven HC-SR04 measurement on a Raspberry Pi using C.
 
 This code uses the `libgpiod` library and time stamped events to measure the length of the echo pulse. See <https://github.com/HankB/GPIOD_Debian_Raspberry_Pi/blob/main/C_blinky/event_drive.c> for simple code that demonstrates this.
 
