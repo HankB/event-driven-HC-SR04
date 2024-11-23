@@ -29,7 +29,7 @@ S/W is targeted for a Pi Zero and development is performed on a Pi 3B with the H
 |yellow|trigger|16|24|
 |red|VCC|4|
 
-color codes are relative to the DuPont jumpers I used. The resistor divider is 1.5K Echo to orange and 3K orange to ground.
+Color codes are relative to the DuPont jumpers I used. The resistor divider is 1.5K Echo to orange and 3K orange to ground.
 
 ## Device details
 
@@ -40,6 +40,7 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 * 2024-06-27 Testing at greater distance. 50 consecutive readings are all over the place.
 * 2024-06-24 Code seems to be working well, albeit only tested in a Pi 3B and at distances ranging from 1-2 feet. Need to test on a Pi Zero and at other distances. It would be interesting to try on a Pi 5 as well.
+* 2024-11-23 Back to working on this. Need to do more testing and perhaps calibration.
 
 ## Troubleshooting notes
 
@@ -52,3 +53,25 @@ color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 ### 2024-06-22 
 
 * `libgpiod` events generally going well. Occasionally it seems that the rising edge of the pulse has been missed so the code has been restructured and will retry in this situation (sending another trigger pulse and monitoring for events on the echo input.)
+
+## Local dev notes
+
+I need to record where I'm working on this so if I need to set it aside and come back months later, I can resume on the correct host.
+
+### 2024-11-32 environment
+
+* Test/target host Raspberry Pi Zero W Rev 1.1 running RpiOS Bookworm and fully updated (HC-SR04 connected)
+* `libgpiod` 1.6.3
+* `canby`
+
+* Dev host: Raspberry Pi 4 Model B Rev 1.5 (2GB) running RpiOS Bullseye 32 bit fully up to date
+* `libgpiod` 1.6.2
+* `nbw` (New Brandywine)
+
+Editing using VS code/SSH from desktop. Typical commands (on `canby`)
+
+```text
+cd Programming/event-driven-HC-SR04/
+gcc -Wall -o hcsr04_distance hcsr04_distance.c  -l gpiod
+scp hcsr04_distance nbw:bin
+```
