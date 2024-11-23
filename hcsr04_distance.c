@@ -71,6 +71,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    fprintf( stderr, "pulse seconds, distance inches\n");
+
     int reading_count = 0;
     bool need_pulse = true;
     while (reading_count < 50)
