@@ -16,6 +16,6 @@ Situate the sensor such that distance to a flat surface can be controlled and ta
 
 Import the readings into a spreadsheet to facilitate further analysis.
 
-### Eatablish datum
+### Establish datum
 
 Determine where the 2 cm distance is measured from by adjusting the position of the sensor from a flat surace until it reports 2 cm (0.78 inch) distance. This turns out to be about 5/8 inch from the front edge of ths sensor. The 50 readings average to 0.776 inch.
