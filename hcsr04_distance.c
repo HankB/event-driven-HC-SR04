@@ -18,13 +18,14 @@ Build:
 #include <gpiod.h>
 
 static int send_pulse(struct gpiod_line *);
-static float read_distance(void);
+
 typedef enum
 {
     read_line,
     write_line,
     monitor_line,
 } line_function;
+
 struct gpiod_line *init_GPIO(struct gpiod_chip *chip,
                              const char *name,
                              const char *context,
@@ -119,7 +120,10 @@ int main(int argc, char **argv)
                 if (start.tv_sec != 0) // if we didn't miss the start of the pulse
                 {
                     finish = event.ts;
-                    printf("distance %f\n", read_distance());
+                    float pulse_width = ((float)(finish.tv_nsec - start.tv_nsec) / 1000000000) 
+                    + (finish.tv_sec - start.tv_sec);
+                    float distance = pulse_width * 1100 * 12 / 2.0; // distance in inches based on 1100 fps in air
+                    printf("%f, %f\n", pulse_width, distance);
                     start.tv_sec = 0; // zero our for next reading
                     reading_count++;
                 }
@@ -191,14 +195,4 @@ static int send_pulse(struct gpiod_line *line)
         return 1;
     }
     return 0;
-}
-
-// read_distance() will calculate the distance in feet based on time
-//  stamps collected during event monitoring
-static float read_distance(void)
-{
-    float pulse_width = ((float)(finish.tv_nsec - start.tv_nsec) / 1000000000) 
-                        + (finish.tv_sec - start.tv_sec);
-    float distance = pulse_width * 1100 * 12 / 2.0; // distance in inches based on 1100 fps in air
-    return distance;
 }
