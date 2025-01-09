@@ -71,7 +71,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    fprintf( stderr, "pulse seconds, distance inches\n");
+    fprintf(stderr, "pulse seconds, distance inches\n");
 
     int reading_count = 0;
     bool need_pulse = true;
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     {
         if (need_pulse)
         {
-            usleep(60*1000); // delay 60 msec per recommendation
+            usleep(60 * 1000);                 // delay 60 msec per recommendation
             int rc = send_pulse(trigger_line); // send the trigger pulse
             if (0 != rc)
             {
@@ -102,35 +102,41 @@ int main(int argc, char **argv)
             gpiod_chip_close(chip);
             return -1;
         }
-        struct gpiod_line_event event;
-        rc = gpiod_line_event_read(echo_line, &event);
-        if (rc < 0)
+        else if (rc == 0)
         {
-            perror("gpiod_line_event_read(gpio_11, &event)");
+            need_pulse = true;
         }
         else
         {
-            switch (event.event_type)
+            struct gpiod_line_event event;
+            rc = gpiod_line_event_read(echo_line, &event);
+            if (rc < 0)
             {
-            case GPIOD_LINE_EVENT_RISING_EDGE:
-            {
-                start = event.ts;
-                break;
+                perror("gpiod_line_event_read(gpio_11, &event)");
             }
-            case GPIOD_LINE_EVENT_FALLING_EDGE:
+            else
             {
-                if (start.tv_sec != 0) // if we didn't miss the start of the pulse
+                switch (event.event_type)
                 {
-                    finish = event.ts;
-                    float pulse_width = ((float)(finish.tv_nsec - start.tv_nsec) / 1000000000) 
-                    + (finish.tv_sec - start.tv_sec);
-                    float distance = pulse_width * 1100 * 12 / 2.0; // distance in inches based on 1100 fps in air
-                    printf("%f, %f\n", pulse_width, distance);
-                    start.tv_sec = 0; // zero our for next reading
-                    reading_count++;
+                case GPIOD_LINE_EVENT_RISING_EDGE:
+                {
+                    start = event.ts;
+                    break;
                 }
-                need_pulse = true;
-            }
+                case GPIOD_LINE_EVENT_FALLING_EDGE:
+                {
+                    if (start.tv_sec != 0) // if we didn't miss the start of the pulse
+                    {
+                        finish = event.ts;
+                        float pulse_width = ((float)(finish.tv_nsec - start.tv_nsec) / 1000000000) + (finish.tv_sec - start.tv_sec);
+                        float distance = pulse_width * 1100 * 12 / 2.0; // distance in inches based on 1100 fps in air
+                        printf("%f, %f\n", pulse_width, distance);
+                        start.tv_sec = 0; // zero our for next reading
+                        reading_count++;
+                    }
+                    need_pulse = true;
+                }
+                }
             }
         }
     }
@@ -182,7 +188,6 @@ struct gpiod_line *init_GPIO(struct gpiod_chip *chip,
 
 static int send_pulse(struct gpiod_line *line)
 {
-    //  printf("sending pulse\n");
     int rc = gpiod_line_set_value(line, 1);
     if (rc < 0)
     {
