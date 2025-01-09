@@ -8,7 +8,7 @@ With the existing Python code that performs this function, I have coded it to ta
 
 ## Preliminary testing
 
-Place the sensor about 2 1/2 feet above the ground aimed at a garage door 224 inches aeay. Readings were all over the place and not reflective of the actual distance. (This is well past the qouted range of the sensor.) Repeating the test at 9 feet (108 inches) resulted in 50 readings that looked to be (at a glance) within half an inch of 108 inches.
+Place the sensor about 2 1/2 feet above the ground aimed at a garage door 224 inches away. Readings were all over the place and not reflective of the actual distance. (This is well past the qouted range of the sensor.) Repeating the test at 9 feet (108 inches) resulted in 50 readings that looked to be (at a glance) within half an inch of 108 inches.
 
 ## Plan
 
