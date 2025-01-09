@@ -79,3 +79,7 @@ scp hcsr04_distance nbw:bin
 ## 2025-01-09 I broke it
 
 Back to testing/dev. `hcsr04_distancepy` starts and hangs. The Python version I used previously still works so the H/W connection is good. Checking GPIO assignments - look good. Rebuilt and try again. One reading on the first try before hanging. That seems repeatable, sometimes. Clearly a recent change to the logic is not effective. :-/
+
+## 2025-01-09 I fixed it
+
+Needed to resend the pulse when `gpiod_line_event_wait()` returns zero.
