@@ -83,3 +83,7 @@ Back to testing/dev. `hcsr04_distancepy` starts and hangs. The Python version I 
 ## 2025-01-09 I fixed it
 
 Needed to resend the pulse when `gpiod_line_event_wait()` returns zero.
+
+## 2025-01-09 ARGGG still broke
+
+Python cide reports more or less correct distance most of the time (with some occasional wildly inaccurate readings: 268 vs. 22.3)
