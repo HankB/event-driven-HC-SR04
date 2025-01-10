@@ -26,6 +26,8 @@ typedef enum
     monitor_line,
 } line_function;
 
+static int debug_lvl = 2; // control chattiness
+
 struct gpiod_line *init_GPIO(struct gpiod_chip *chip,
                              const char *name,
                              const char *context,
@@ -65,13 +67,14 @@ int main(int argc, char **argv)
 
     if (0 == echo_line)
     {
-        perror("gpiod_chip_find_line(echo_name)");
+        perror("init_GPIO(echo_name)");
         gpiod_line_release(trigger_line);
         gpiod_chip_close(chip);
         return 1;
     }
 
-    fprintf(stderr, "pulse seconds, distance inches\n");
+    if (debug_lvl > 0)
+        fprintf(stderr, "pulse seconds, distance inches\n");
 
     int reading_count = 0;
     bool need_pulse = true;
@@ -79,8 +82,10 @@ int main(int argc, char **argv)
     {
         if (need_pulse)
         {
-            usleep(60 * 1000);                 // delay 60 msec per recommendation
+            usleep(100 * 1000);                 // delay 60 msec per recommendation - try 100 ms
             int rc = send_pulse(trigger_line); // send the trigger pulse
+            if (debug_lvl > 2)
+                printf("\t\t\tsend_pulse() rc=%d\n", rc);
             if (0 != rc)
             {
                 perror("send_pulse(trigger_line)");
@@ -94,6 +99,8 @@ int main(int argc, char **argv)
 
         const struct timespec timeout = {0L, 1000000L}; // 1000000ns, 0s
         int rc = gpiod_line_event_wait(echo_line, &timeout);
+        if (debug_lvl > 1)
+            printf("\t\t\tgpiod_line_event_wait() rc=%d\n", rc);
         if (rc < 0)
         {
             perror("gpiod_line_event_wait(echo_line)");
@@ -110,6 +117,8 @@ int main(int argc, char **argv)
         {
             struct gpiod_line_event event;
             rc = gpiod_line_event_read(echo_line, &event);
+            if (debug_lvl > 1)
+                printf("\t\t\tgpiod_line_event_read() rc=%d, type=%d\n", rc, event.event_type);
             if (rc < 0)
             {
                 perror("gpiod_line_event_read(gpio_11, &event)");
@@ -135,6 +144,12 @@ int main(int argc, char **argv)
                         reading_count++;
                     }
                     need_pulse = true;
+                    break;
+                }
+                default:
+                {
+                    fprintf(stderr, "\t\t\tUnknown event.event_type %d\n", event.event_type);
+                    break;
                 }
                 }
             }
