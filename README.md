@@ -38,6 +38,7 @@ Color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
+* 205-01-14 Testing at ~105 inches there are occasional outliers (2 of 50) but most readings look reasonable. This is considerec complete pending further testing.
 * 2024-06-27 Testing at greater distance. 50 consecutive readings are all over the place.
 * 2024-06-24 Code seems to be working well, albeit only tested in a Pi 3B and at distances ranging from 1-2 feet. Need to test on a Pi Zero and at other distances. It would be interesting to try on a Pi 5 as well.
 * 2024-11-23 Back to working on this. Need to do more testing and perhaps calibration.
@@ -90,4 +91,24 @@ Python code reports more or less correct distance most of the time (with some oc
 
 ## 2025-01-10 add debug output
 
-Code seems to be miossing the rising edge. Will look at timing ov various events.
+Code seems to be missing the rising edge. Will look at timing ov various events.
+
+## 2025-01-14
+
+After much struggling (and adding debug statements), the code was tested on another host (Pi 4B) running RpiOS 11 and generally found to be working. Further testing seems to indicate that the 32 bit kernel is relatred to the issue. Measurements worked as desired on a Pi 4B and Zero 2W with the same 32 bit Bookworm installation on the SD card. The difference is that the Zero 2W and 4B boot a 64 bit kernel and the Zero W boots a 32 bit kernel.
+
+```text
+hbarta@nbw:~ $ uname -a
+Linux nbw 6.6.62+rpt-rpi-v7 #1 SMP Raspbian 1:6.6.62-1+rpt1 (2024-11-25) armv7l GNU/Linux
+hbarta@nbw:~ $ 
+```
+
+```text
+hbarta@canby:~ $ uname -a
+Linux canby 6.1.21-v8+ #1642 SMP PREEMPT Mon Apr  3 17:24:16 BST 2023 aarch64 GNU/Linux
+hbarta@canby:~ $ 
+```
+
+After moving the card and HC-SR04 back to the Zero to confirm that the 32 bit kernel causes the issue, the program worked as desired. My first inclination is to suspect that I had somehow swapped the connections (and inadvertently "fixed" things.) And to be sure, the alternate Python program no longer works. But I *did* try the Python code on the 64 bit kernels and it did work.
+
+Tested at ~105 inches and results were generally satisfactory. Tested *in situ* and results were questionable. However, the unit was operating at about -10°C which is outside the stated range of the unit. At this point, the results are considered satisfactory.
