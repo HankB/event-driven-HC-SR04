@@ -1,5 +1,7 @@
 # event-driven-HC-SR04
 
+**You are viewing a branch that uses GPIOD V1.6. This was the version of GPIOD available on Debian Bookworm and corresponding RPiOS releases. The `main` branch will soon be upgraded to work with V2.2 which ships with Trixie.**
+
 Event driven HC-SR04 measurement on a Raspberry Pi using C.
 
 This code uses the `libgpiod` library and time stamped events to measure the length of the echo pulse. See <https://github.com/HankB/GPIOD_Debian_Raspberry_Pi/blob/main/C_blinky/event_drive.c> for simple code that demonstrates this.
