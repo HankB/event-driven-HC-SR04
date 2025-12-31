@@ -1,5 +1,7 @@
 # event-driven-HC-SR04
 
+**This branch is a WIP to work with GPIOD V2.2 which ships with Debian Trixie and derivatives. If you are working with an older version of Debian (or RPiOS) you will want to look at the `GPIOD_V1.6` branch.**
+
 Event driven HC-SR04 measurement on a Raspberry Pi using C.
 
 This code uses the `libgpiod` library and time stamped events to measure the length of the echo pulse. See <https://github.com/HankB/GPIOD_Debian_Raspberry_Pi/blob/main/C_blinky/event_drive.c> for simple code that demonstrates this.
@@ -38,10 +40,7 @@ Color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
-* 205-01-14 Testing at ~105 inches there are occasional outliers (2 of 50) but most readings look reasonable. This is considerec complete pending further testing.
-* 2024-06-27 Testing at greater distance. 50 consecutive readings are all over the place.
-* 2024-06-24 Code seems to be working well, albeit only tested in a Pi 3B and at distances ranging from 1-2 feet. Need to test on a Pi Zero and at other distances. It would be interesting to try on a Pi 5 as well.
-* 2024-11-23 Back to working on this. Need to do more testing and perhaps calibration.
+* 2025-12-31 The version that uses libgpiod V2.2 will require a complete rewrite.
 
 ## Troubleshooting notes
 
