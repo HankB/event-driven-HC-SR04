@@ -1,5 +1,7 @@
 # test readings
 
+**Obsolete - relevant for the GPIOD_V1.7 branch.**
+
 ## 2024-11-23
 1 inch
 
