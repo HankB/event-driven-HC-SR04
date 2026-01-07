@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 
     int reading_count = 0;
     bool need_pulse = true;
-    while (reading_count < 5)
+    while (reading_count < 50)
     {
         if (need_pulse)
         {
