@@ -111,3 +111,7 @@ hbarta@canby:~ $
 After moving the card and HC-SR04 back to the Zero to confirm that the 32 bit kernel causes the issue, the program worked as desired. My first inclination is to suspect that I had somehow swapped the connections (and inadvertently "fixed" things.) And to be sure, the alternate Python program no longer works. But I *did* try the Python code on the 64 bit kernels and it did work.
 
 Tested at ~105 inches and results were generally satisfactory. Tested *in situ* and results were questionable. However, the unit was operating at about -10°C which is outside the stated range of the unit. At this point, the results are considered satisfactory.
+
+## errata
+
+* 2026-01-06 TIL that Linux seems not to be able to provide microsecond timing delay. See `microseconds.cpp` for an example.
