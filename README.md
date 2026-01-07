@@ -40,6 +40,9 @@ Color codes are relative to the DuPont jumpers I used. The resistor divider is 1
 
 ## Status
 
+* 2026-01-07 The C++ version is working.
+    * It needs more thorough testing
+    * It really wants to be refactored as a proper C++ program.
 * 2025-12-31 The version that uses libgpiod V2.2 will require a complete rewrite.
 
 ## Troubleshooting notes
