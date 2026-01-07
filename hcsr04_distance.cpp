@@ -3,7 +3,7 @@
 
 /*
 Build
-g++ -Wall -o hcsr04_distance hcsr04_distance.cpp -lgpiodcxxstd
+g++ -Wall -o hcsr04_distance hcsr04_distance.cpp -lgpiodcxx
 g++ -Wall -c hcsr04_distance.cpp
 */
 
@@ -220,3 +220,4 @@ int main(int argc, char **argv)
         }
     }
 }
+
