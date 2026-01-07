@@ -3,7 +3,7 @@
 
 /*
 Build
-g++ -Wall -o hcsr04_distance hcsr04_distance.cpp -lgpiodcxxstd
+g++ -Wall -o hcsr04_distance hcsr04_distance.cpp -lgpiodcxx
 g++ -Wall -c hcsr04_distance.cpp
 */
 
@@ -21,7 +21,7 @@ namespace
     auto timeout = ::chrono::nanoseconds((long long unsigned)5 * 1000000000); // timeout in nano-seconds
     const char *consumer = "HC-SR04";
 
-    constexpr int debug_lvl = 0; // control chattiness
+    constexpr int debug_lvl = 0; // control chattiness 0-3
     chrono::_V2::system_clock::duration pulse_send_ts;
     chrono::_V2::system_clock::duration wait_start_ts;
     chrono::_V2::system_clock::duration wait_complete_ts;
@@ -66,27 +66,34 @@ namespace
 
 int main(int argc, char **argv)
 {
-    cout << "GPIOD version " << gpiod::api_version() << endl;
+    if (debug_lvl > 1)
+        cout << "GPIOD version " << gpiod::api_version() << endl;
 
     // chip object
 
     gpiod::chip chip("/dev/gpiochip0");
     if (!chip)
     {
-        cout << "chip not constructed" << endl;
+        cerr << "chip not constructed" << endl;
         exit(-1);
     }
-    else
+    else if (debug_lvl > 1)
     {
+
         cout << "chip is constructed and useable" << endl;
     }
-    gpiod::chip_info info = chip.get_info();
-    cout << "name:" << info.name() << " label:" << info.label() << endl;
+    if (debug_lvl > 1)
+    {
+        gpiod::chip_info info = chip.get_info();
+        cout << "name:" << info.name() << " label:" << info.label() << endl;
+    }
 
     gpiod::edge_event_buffer events;
-    cout << "empty buffer holds " << events.num_events() << " events"
-         << " and has a capacity of " << events.capacity() << endl;
-
+    if (debug_lvl > 1)
+    {
+        cout << "empty buffer holds " << events.num_events() << " events"
+             << " and has a capacity of " << events.capacity() << endl;
+    }
     // input processing from the GPIOD example follow_input.cpp
     // but probably don;t need the pullup and only interest is
     // the rising input.
@@ -120,11 +127,11 @@ int main(int argc, char **argv)
     output_request.set_value(trigger_line_offset, ::gpiod::line::value::INACTIVE);
 
     if (debug_lvl > 0)
-        cerr << "pulse seconds, distance inches" << endl;
+        cerr << "pulse width, distance inches" << endl;
 
     int reading_count = 0;
     bool need_pulse = true;
-    while (reading_count < 50)
+    while (reading_count < 5)
     {
         if (need_pulse)
         {
@@ -133,7 +140,7 @@ int main(int argc, char **argv)
 
             need_pulse = false;
             if (debug_lvl > 1)
-                cout << "\t\t\tpulse rdback " << before_pulse << ", "
+                cout << "\t\t\tpulse rdback (before, during, after) " << before_pulse << ", "
                      << during_pulse << ", " << after_pulse << endl;
         }
         wait_start_ts = chrono::high_resolution_clock::now().time_since_epoch();
@@ -144,7 +151,8 @@ int main(int argc, char **argv)
         constexpr size_t reading_delay = 100;
 
         // timeout in nano-seconds
-        auto timeout = ::chrono::nanoseconds(1000000L);
+        //auto timeout = ::chrono::nanoseconds(1000000000L);
+        auto timeout = ::chrono::milliseconds(100L);
 
         if (debug_lvl > 2)
         {
@@ -159,7 +167,7 @@ int main(int argc, char **argv)
         wait_complete_ts = chrono::high_resolution_clock::now().time_since_epoch();
         if (debug_lvl > 2)
         {
-            cout << "\t\t\t\t";
+            cout << "\t\t\t";
             for (size_t i = 0; i < reading_size; i++)
             {
                 cout << readings[i] << " ";
@@ -168,10 +176,10 @@ int main(int argc, char **argv)
         }
         if (debug_lvl > 1)
         {
-            auto delta = wait_start_ts - pulse_send_ts;
-            cout << "\t\t\twait rdback " << before_wait << " " << after_wait << endl;
-            cout << "\t\t\twait_edge_events() have_events:" << have_events << " "
-                 << wait_start_ts.count() - pulse_send_ts.count() << " "
+            // auto delta = wait_start_ts - pulse_send_ts;
+            cout << "\t\t\twait rdback (before, after) " << before_wait << " " << after_wait << endl;
+            cout << "\t\t\twait_edge_events() have_events:" << have_events << " start-send "
+                 << wait_start_ts.count() - pulse_send_ts.count() << " wait-send "
                  << wait_complete_ts.count() - pulse_send_ts.count() << endl;
         }
         if (!have_events)
@@ -187,10 +195,9 @@ int main(int argc, char **argv)
             for (const auto &event : events)
             {
 
-                ::cout << "line: " << event.line_offset()
-                       << "  type: " << ::setw(7) << ::left << event
-                       << "  event #" << event.line_seqno()
-                       << ::endl;
+                if (debug_lvl > 1)
+                    ::cout << event << ::endl;
+
                 switch (event.type())
                 {
                 case ::gpiod::edge_event::event_type::RISING_EDGE:
@@ -202,9 +209,12 @@ int main(int argc, char **argv)
                         finish = event.timestamp_ns();
                         float pulse_width = ((float)(finish - start) / 1000000000);
                         float distance = pulse_width * 1100 * 12 / 2.0; // distance in inches based on 1100 fps in air
-                        cout << "pulse width:" << pulse_width << " is " << distance << " inches" << endl;
+                        if (debug_lvl > 1)
+                            cout << "readings: ";
+                        cout << pulse_width << ", " << distance << endl;
                         start = 0; // zero our indicator for next reading
                         reading_count++;
+                        this_thread::sleep_for(std::chrono::seconds(1));
                     }
                     else
                     {
