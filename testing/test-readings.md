@@ -1,7 +1,5 @@
 # test readings
 
-**Obsolete - relevant for the GPIOD_V1.7 branch.**
-
 Repeated with the 2nd gen version
 
 ## 2026-01-07
